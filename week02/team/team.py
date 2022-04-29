@@ -21,12 +21,25 @@ import json
 from cse251 import *
 
 # TODO Create a class based on (threading.Thread) that will
-# make the API call to request data from the website
+# make the API call to request_info data from the website
+
 
 class Request_thread(threading.Thread):
     # TODO - Add code to make an API call and return the results
     # https://realpython.com/python-requests/
-    pass
+
+    def __init__(self, url):
+        super().__init__()
+
+        self.url = url
+        self.response = {}
+
+    def run(self):
+        response = requests.get(self.url)
+        if response.status_code == 200:
+            self.response = response.json()
+        else:
+            print('RESPONSE = ', response.status_code)
 
 class Deck:
 
@@ -35,18 +48,26 @@ class Deck:
         self.reshuffle()
         self.remaining = 52
 
-
     def reshuffle(self):
         # TODO - add call to reshuffle
-        pass
+        thread = Request_thread(f"https://deckofcardsapi.com/api/deck/{self.id}/shuffle/")
+        thread.start()
+        thread.join()
+
 
     def draw_card(self):
         # TODO add call to get a card
-        pass
+        thread = Request_thread(f"https://deckofcardsapi.com/api/deck/{self.id}/draw/")
+        thread.start()
+        thread.join()
+        if thread.response != {}:
+            self.remaining = thread.response["remaining"]
+            return thread.response['cards'][0]['code']
+        else:
+            return ''
 
     def cards_remaining(self):
         return self.remaining
-
 
     def draw_endless(self):
         if self.remaining <= 0:
@@ -61,7 +82,7 @@ if __name__ == '__main__':
     #        team_get_deck_id.py program once. You can have
     #        multiple decks if you need them
 
-    deck_id = 'ENTER ID HERE'
+    deck_id = '0119xnkvh24r'
 
     # Testing Code >>>>>
     deck = Deck(deck_id)

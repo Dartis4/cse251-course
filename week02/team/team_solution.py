@@ -25,7 +25,7 @@ class Request_thread(threading.Thread):
 
     def run(self):
         response = requests.get(self.url)
-        # Check the status code to see if the request succeeded.
+        # Check the status code to see if the request_info succeeded.
         if response.status_code == 200:
             self.response = response.json()
         else:

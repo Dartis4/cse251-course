@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     response = requests.get(r'https://deckofcardsapi.com/api/deck/new/')
 
-    # Check the status code to see if the request succeeded.
+    # Check the status code to see if the request_info succeeded.
     if response.status_code == 200:
         data = response.json()
 
