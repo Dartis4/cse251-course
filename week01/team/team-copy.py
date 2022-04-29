@@ -18,19 +18,12 @@ import threading
 
 # Include cse 251 common Python files
 from cse251 import *
+max_threads = 10
 
 # Global variable for counting the number of primes found
 prime_count = 0
 numbers_processed = 0
-
-
-def find_primes(start, range_count):
-    global prime_count
-    for i in range(start, start + range_count):
-        if is_prime(i):
-            prime_count += 1
-            print(i, end=', ', flush=True)
-    print(flush=True)
+primes = []
 
 
 def is_prime(n: int) -> bool:
@@ -52,22 +45,31 @@ def is_prime(n: int) -> bool:
     return True
 
 
+def process_range(start, end, index):
+    global prime_count
+    global primes
+
+    for i in range(start + index, end, max_threads):
+        if is_prime(i):
+            prime_count += 1
+            primes.append(i)
+            # print(i, end=', ', flush=True)
+    # print(flush=True)
+
+
 if __name__ == '__main__':
     log = Log(show_terminal=True)
     log.start_timer()
 
     start = 10_000_000_000
-    range_count = 10_000
+    range_count = 100_000
+
+    primes = []
+
     threads = []
-
-    # TODO 1) Get this program running
-    # TODO 2) move the following for loop into 1 thread
-    # TODO 3) change the program to divide the for loop into 10 threads
-
-    for i in range(1, 11):
-        t = threading.Thread(target=find_primes, args=(start, range_count))
+    for i in range(max_threads):
+        t = threading.Thread(target=process_range, args=(start, start + range_count, i))
         threads.append(t)
-        start += range_count
 
     for thread in threads:
         thread.start()
