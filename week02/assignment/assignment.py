@@ -98,16 +98,20 @@ def main():
 
     for category in categories:
         threads = []
-        print(f"{category[0].upper() + category[1:]}: {len(info[category])}")
+        items = []
+        print(f"{category[0].upper() + category[1:]}: {len(info[category])}", flush=True)
         for item in info[category]:
             thread = RequestThread(item)
             thread.start()
             threads.append(thread)
         for thread in threads:
             thread.join()
-            print(f"{thread.response['name']}", end=", ")
-        print("\n")
+            items.append(thread.response['name'])
+        items.sort()
+        print(*items, sep=", ", flush=True)
+        print("\n", flush=True)
 
+    time.sleep(0.01)
     log.stop_timer('Total Time To complete')
     log.write(f'There were {call_count} calls to the server')
     
