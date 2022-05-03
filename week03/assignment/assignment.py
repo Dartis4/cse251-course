@@ -3,7 +3,7 @@
 Course: CSE 251
 Lesson Week: 03
 File: assignment.py
-Author: <Your Name>
+Author: Dane Artis
 
 Purpose: Video Frame Processing
 
@@ -31,7 +31,7 @@ CPU_COUNT = mp.cpu_count() + 4
 
 # TODO Your final video need to have 300 processed frames.  However, while you are 
 # testing your code, set this much lower
-FRAME_COUNT = 20
+FRAME_COUNT = 300
 
 RED   = 0
 GREEN = 1
@@ -60,8 +60,26 @@ def create_new_frame(image_file, green_file, process_file):
     image_new.save(process_file)
 
 
-# TODO add any functions to need here
+# TODO add any functions you need here
+def gen_frame(frame_num):
+    # Generate filenames
+    image_file = rf'elephant/image{frame_num:03d}.png'
+    green_file = rf'green/image{frame_num:03d}.png'
+    process_file = rf'processed/image{frame_num:03d}.png'
 
+    # Create the frame from the filenames
+    create_new_frame(image_file, green_file, process_file)
+
+
+def parallel_frame_gen(cores, frames):
+    print(f'Number of cores: {cores}\nFrames processed:', flush=True)
+    # Generate each frame in parallel
+    start_time = timeit.default_timer()
+    with mp.Pool(cores) as p:
+        p.map(gen_frame, frames)
+    process_time = timeit.default_timer() - start_time
+    print(f'\nTime To Process all images = {process_time}', flush=True)
+    return process_time
 
 
 if __name__ == '__main__':
@@ -77,20 +95,12 @@ if __name__ == '__main__':
     # TODO Process all frames trying 1 cpu, then 2, then 3, ... to CPU_COUNT
     #      add results to xaxis_cpus and yaxis_times
 
-
-    # sample code: remove before submitting  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # process one frame #10
-    image_number = 10
-
-    image_file = rf'elephant/image{image_number:03d}.png'
-    green_file = rf'green/image{image_number:03d}.png'
-    process_file = rf'processed/image{image_number:03d}.png'
-
-    start_time = timeit.default_timer()
-    create_new_frame(image_file, green_file, process_file)
-    print(f'\nTime To Process all images = {timeit.default_timer() - start_time}')
-    # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
+    # Iterate up to the possible number of cores
+    num_frames = range(1, FRAME_COUNT)
+    for num_cores in range(1, CPU_COUNT):
+        # Process in parallel and add results for the plot
+        xaxis_cpus.append(num_cores)
+        yaxis_times.append(parallel_frame_gen(num_cores, num_frames))
 
     log.write(f'Total Time for ALL processing: {timeit.default_timer() - all_process_time}')
 
