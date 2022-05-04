@@ -25,14 +25,17 @@ import time
 # Include cse 251 common Python files
 from cse251 import *
 
-words = ['BOOKMARK', 'SURNAME', 'RETHINKING', 'HEAVY', 'IRONCLAD', 'HAPPY', 
-        'JOURNAL', 'APPARATUS', 'GENERATOR', 'WEASEL', 'OLIVE', 
-        'LINING', 'BAGGAGE', 'SHIRT', 'CASTLE', 'PANEL', 
-        'OVERCLOCKING', 'PRODUCER', 'DIFFUSE', 'SHORE', 
-        'CELL', 'INDUSTRY', 'DIRT', 
-        'TEACHING', 'HIGHWAY', 'DATA', 'COMPUTER', 
-        'TOOTH', 'COLLEGE', 'MAGAZINE', 'ASSUMPTION', 'COOKIE', 
-        'EMPLOYEE', 'DATABASE', 'POET', 'COMPUTER', 'SAMPLE']
+CPU_COUNT = mp.cpu_count() + 4
+
+words = ['BOOKMARK', 'SURNAME', 'RETHINKING', 'HEAVY', 'IRONCLAD', 'HAPPY',
+         'JOURNAL', 'APPARATUS', 'GENERATOR', 'WEASEL', 'OLIVE',
+         'LINING', 'BAGGAGE', 'SHIRT', 'CASTLE', 'PANEL',
+         'OVERCLOCKING', 'PRODUCER', 'DIFFUSE', 'SHORE',
+         'CELL', 'INDUSTRY', 'DIRT',
+         'TEACHING', 'HIGHWAY', 'DATA', 'COMPUTER',
+         'TOOTH', 'COLLEGE', 'MAGAZINE', 'ASSUMPTION', 'COOKIE',
+         'EMPLOYEE', 'DATABASE', 'POET', 'COMPUTER', 'SAMPLE']
+
 
 # https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-python
 class bcolors:
@@ -48,23 +51,22 @@ class bcolors:
 
 
 class Board():
-
     directions = (
-        (1, 0),   # E
-        (1, 1),   # SE
-        (0, 1),   # S
+        (1, 0),  # E
+        (1, 1),  # SE
+        (0, 1),  # S
         (-1, 1),  # SW
         (-1, 0),  # W
-        (-1, -1), # NW
+        (-1, -1),  # NW
         (0, -1),  # N
-        (1, -1)   # NE
+        (1, -1)  # NE
     )
 
     def __init__(self, size):
         """ Create the instance and the board arrays """
         self.size = size
-        self.board = [['.' for _ in range(size)] for _ in range(size)] 
-        self.highlighting = [[False for _ in range(size)] for _ in range(size)] 
+        self.board = [['.' for _ in range(size)] for _ in range(size)]
+        self.highlighting = [[False for _ in range(size)] for _ in range(size)]
 
     def _word_fits(self, word, row, col, direction):
         """ Helper function: Fit a word in the board """
@@ -151,22 +153,25 @@ class Board():
 
 
 def main():
-    board = Board(25)
-    board.place_words(words)
+    manager = mp.Manager()
+    ns = manager.Namespace()
+    ns.board = Board(25)
+    ns.board.place_words(words)
 
     print('Board with placed words')
-    board.display()
-    board.fill_in_dots()
-    board.display()
+    ns.board.display()
+    ns.board.fill_in_dots()
+    ns.board.display()
 
     start = time.perf_counter()
-    for word in words:
-        if not board.find_word(word):
-            print(f'Error: Could not find "{word}"')
-    
+    with mp.Pool(CPU_COUNT) as p:
+        found = p.map(ns.board.find_word, words)
+    for word, found in zip(words, found):
+        if not found:
+            print(f'Error: could not find {word}')
     total_time = time.perf_counter() - start
 
-    board.display()
+    ns.board.display()
     print(f'Time to find words = {total_time}')
 
 
