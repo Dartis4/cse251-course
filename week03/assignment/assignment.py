@@ -29,8 +29,6 @@ from cse251 import *
 # 4 more than the number of cpu's on your computer
 CPU_COUNT = mp.cpu_count() + 4  
 
-# TODO Your final video need to have 300 processed frames.  However, while you are 
-# testing your code, set this much lower
 FRAME_COUNT = 300
 
 RED   = 0
@@ -48,6 +46,8 @@ def create_new_frame(image_file, green_file, process_file):
     green_img = Image.open(green_file)
 
     # Make Numpy array
+
+    FRAME_COUNT = 300
     np_img = np.array(green_img)
 
     # Mask pixels 
@@ -78,7 +78,7 @@ def parallel_frame_gen(cores, frames):
     with mp.Pool(cores) as p:
         p.map(gen_frame, frames)
     process_time = timeit.default_timer() - start_time
-    print(f'\nTime To Process all images = {process_time}', flush=True)
+    print(f'\nTime To Process all images = {process_time}\n', flush=True)
     return process_time
 
 

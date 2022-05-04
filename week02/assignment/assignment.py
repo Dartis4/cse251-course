@@ -109,12 +109,12 @@ def main():
             items.append(thread.response['name'])
         items.sort()
         print(*items, sep=", ", flush=True)
-        print("\n", flush=True)
+        print(flush=True)
 
     time.sleep(0.01)
     log.stop_timer('Total Time To complete')
     log.write(f'There were {call_count} calls to the server')
-    
+
 
 if __name__ == "__main__":
     main()
