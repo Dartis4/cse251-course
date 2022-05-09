@@ -25,17 +25,14 @@ import time
 # Include cse 251 common Python files
 from cse251 import *
 
-CPU_COUNT = mp.cpu_count() + 4
-
 words = ['BOOKMARK', 'SURNAME', 'RETHINKING', 'HEAVY', 'IRONCLAD', 'HAPPY',
-         'JOURNAL', 'APPARATUS', 'GENERATOR', 'WEASEL', 'OLIVE',
-         'LINING', 'BAGGAGE', 'SHIRT', 'CASTLE', 'PANEL',
-         'OVERCLOCKING', 'PRODUCER', 'DIFFUSE', 'SHORE',
-         'CELL', 'INDUSTRY', 'DIRT',
-         'TEACHING', 'HIGHWAY', 'DATA', 'COMPUTER',
-         'TOOTH', 'COLLEGE', 'MAGAZINE', 'ASSUMPTION', 'COOKIE',
-         'EMPLOYEE', 'DATABASE', 'POET', 'COMPUTER', 'SAMPLE']
-
+        'JOURNAL', 'APPARATUS', 'GENERATOR', 'WEASEL', 'OLIVE',
+        'LINING', 'BAGGAGE', 'SHIRT', 'CASTLE', 'PANEL',
+        'OVERCLOCKING', 'PRODUCER', 'DIFFUSE', 'SHORE',
+        'CELL', 'INDUSTRY', 'DIRT',
+        'TEACHING', 'HIGHWAY', 'DATA', 'COMPUTER',
+        'TOOTH', 'COLLEGE', 'MAGAZINE', 'ASSUMPTION', 'COOKIE',
+        'EMPLOYEE', 'DATABASE', 'POET', 'COMPUTER', 'SAMPLE']
 
 # https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-python
 class bcolors:
@@ -51,15 +48,16 @@ class bcolors:
 
 
 class Board():
+
     directions = (
-        (1, 0),  # E
-        (1, 1),  # SE
-        (0, 1),  # S
+        (1, 0),   # E
+        (1, 1),   # SE
+        (0, 1),   # S
         (-1, 1),  # SW
         (-1, 0),  # W
-        (-1, -1),  # NW
+        (-1, -1), # NW
         (0, -1),  # N
-        (1, -1)  # NE
+        (1, -1)   # NE
     )
 
     def __init__(self, size):
@@ -129,16 +127,26 @@ class Board():
     def _word_at_this_location(self, row, col, direction, word):
         """ Helper function: is the word found on the board at (x, y) in a direction """
         dir_x, dir_y = self.directions[direction]
-        highlight_copy = copy.deepcopy(self.highlighting)
+
+        # duplicate the whole board
+        # highlight_copy = copy.deepcopy(self.highlighting)
+
+        changes = []
+
         for letter in word:
             board_letter = self.get_letter(row, col)
             if board_letter == letter:
                 self.highlight(row, col)
+                changes.append((row, col))
                 row += dir_x
                 col += dir_y
             else:
-                self.highlighting = copy.deepcopy(highlight_copy)
+                # undo changes
+                # self.highlighting = copy.deepcopy(highlight_copy)
                 return False
+        # apply changes for highlighting
+        for r, c in changes:
+            self.highlight(r, c)
         return True
 
     def find_word(self, word):
@@ -146,32 +154,39 @@ class Board():
         print(f'Finding {word}...')
         for row in range(self.size):
             for col in range(self.size):
-                for d in range(0, 8):
-                    if self._word_at_this_location(row, col, d, word):
-                        return True
+                if self.board[row][col] == word[0]:
+                    for d in range(0, 8):
+                        if self._word_at_this_location(row, col, d, word):
+                            return True
         return False
+
+    def create_lookup_dict(self):
+        # create lookup dictionary (letter -> [])
+        self.lookup = {letter:[] for letter in string.ascii_uppercase}
+
+        for row in range(self.size):
+            for col in range(self.size):
+                self.lookup[self.board[row][col]].append((row, col))
+        # print(self.lookup)
 
 
 def main():
-    manager = mp.Manager()
-    ns = manager.Namespace()
-    ns.board = Board(25)
-    ns.board.place_words(words)
+    board = Board(25)
+    board.place_words(words)
 
     print('Board with placed words')
-    ns.board.display()
-    ns.board.fill_in_dots()
-    ns.board.display()
+    board.display()
+    board.fill_in_dots()
+    board.display()
 
     start = time.perf_counter()
-    with mp.Pool(CPU_COUNT) as p:
-        found = p.map(ns.board.find_word, words)
-    for word, found in zip(words, found):
-        if not found:
-            print(f'Error: could not find {word}')
+    for word in words:
+        if not board.find_word(word):
+            print(f'Error: Could not find "{word}"')
+
     total_time = time.perf_counter() - start
 
-    ns.board.display()
+    board.display()
     print(f'Time to find words = {total_time}')
 
 
