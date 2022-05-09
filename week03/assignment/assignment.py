@@ -46,8 +46,6 @@ def create_new_frame(image_file, green_file, process_file):
     green_img = Image.open(green_file)
 
     # Make Numpy array
-
-    FRAME_COUNT = 300
     np_img = np.array(green_img)
 
     # Mask pixels 
@@ -60,7 +58,6 @@ def create_new_frame(image_file, green_file, process_file):
     image_new.save(process_file)
 
 
-# TODO add any functions you need here
 def gen_frame(frame_num):
     # Generate filenames
     image_file = rf'elephant/image{frame_num:03d}.png'
@@ -72,13 +69,12 @@ def gen_frame(frame_num):
 
 
 def parallel_frame_gen(cores, frames):
-    print(f'Number of cores: {cores}\nFrames processed:', flush=True)
+    print(f'Frames processed:', flush=True)
     # Generate each frame in parallel
     start_time = timeit.default_timer()
     with mp.Pool(cores) as p:
         p.map(gen_frame, frames)
     process_time = timeit.default_timer() - start_time
-    print(f'\nTime To Process all images = {process_time}\n', flush=True)
     return process_time
 
 
@@ -92,15 +88,15 @@ if __name__ == '__main__':
     xaxis_cpus = []
     yaxis_times = []
 
-    # TODO Process all frames trying 1 cpu, then 2, then 3, ... to CPU_COUNT
-    #      add results to xaxis_cpus and yaxis_times
-
     # Iterate up to the possible number of cores
     num_frames = range(1, FRAME_COUNT)
     for num_cores in range(1, CPU_COUNT):
+        log.write(f'Number of cores: {num_cores}')
         # Process in parallel and add results for the plot
         xaxis_cpus.append(num_cores)
-        yaxis_times.append(parallel_frame_gen(num_cores, num_frames))
+        proc_time = parallel_frame_gen(num_cores, num_frames)
+        log.write(f'Time To Process all images = {proc_time}\n')
+        yaxis_times.append(proc_time)
 
     log.write(f'Total Time for ALL processing: {timeit.default_timer() - all_process_time}')
 
