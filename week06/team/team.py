@@ -1,7 +1,7 @@
 """
 Course: CSE 251
 Lesson Week: 06
-File: team.py
+File: team-bad.py
 Author: Brother Comeau
 
 Purpose: Team Activity

@@ -1,7 +1,7 @@
 """
 Course: CSE 251
 Lesson Week: 01 - Team Activity
-File: team.py
+File: team-bad.py
 Author: Brother Comeau
 
 Purpose: Find prime numbers

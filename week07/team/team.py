@@ -1,7 +1,7 @@
 """
 Course: CSE 251
 Lesson Week: Week 07
-File: team.py
+File: team-bad.py
 Purpose: Week 05 Team Activity
 
 Instructions:
