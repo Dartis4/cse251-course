@@ -51,7 +51,7 @@ class Car:
         # Sleep a little.  Last statement in this for loop - don't change
         time.sleep(random.random() / SLEEP_REDUCE_FACTOR)
 
-        # Display the car that has just be created in the terminal
+        # Display the car that has just been created in the terminal
         # self.display()
 
     def display(self):
@@ -87,35 +87,28 @@ class Factory(threading.Thread):
         self.log = log
 
     def run(self):
-        # self.log.write('FACTORY   :     Waiting for an order...')
         for i in range(CARS_TO_PRODUCE):
             """
             create a car
             place the car on the queue
             signal the dealer that there is a car on the queue
            """
-            # if i == 0:
-                # Car order comes in
-                # self.log.write('FACTORY   :     ORDER RECEIVED')
 
-            # New manufacture process
-            # self.log.write('FACTORY   :     MANUFACTURE NEW CAR')
+            # Does the dealer have space?
             self.empty.acquire()
 
             # Create the car object
-            # self.log.write(f'FACTORY   :     CAR MADE')
             car = Car()
 
-            # Deliver car to dealership
-            # self.log.write(f'FACTORY   :     CAR SHIPPED')
+            # Add car to the dealership inventory
             self.dealership_inventory.put(car)  # CRITICAL SECTION
-            # self.log.write(f'FACTORY   :     Total cars produced: {i + 1}')
 
+            # Signal the dealer about cars in inventory
             self.full.release()
 
         # Let the dealer know we've finished their order
-        # self.log.write('FACTORY   :     ORDER COMPLETE')
-        self.empty.put('Done')
+        self.dealership_inventory.put('Done')
+        # Final signal
         self.full.release()
 
 
@@ -137,55 +130,53 @@ class Dealer(threading.Thread):
             take the car from the queue
             signal the factory that there is an empty slot in the queue
             """
-            # self.log.write('DEALERSHIP:     Waiting for a shipment...')
-            # Car is delivered
+            # Are there cars available in inventory?
             self.full.acquire()
-            # self.log.write('DEALERSHIP:     SHIPMENT RECEIVED')
 
-            # How many cars are on the lot right now?
-            # inventory_size = self.dealership_inventory.size()
-            self.queue_stats[self.dealership_inventory.size() - 1] += 1
+            # How many cars are in queue right now?
+            inventory_size = self.dealership_inventory.size()
 
             # Sell the car
             car = self.dealership_inventory.get()  # CRITICAL SECTION
             if car == 'Done':
-                # Stop if no more cars arrive from the factory
+                # Stop if factory is done
                 break
-            # self.log.write(f'DEALERSHIP:     {inventory_size} car(s) on lot')
-            # self.queue_stats[inventory_size - 1] += 1
-            # self.log.write(f'DEALERSHIP:     CAR SOLD')
-            # self.log.write(f'DEALERSHIP:     Cars left in inventory: {self.dealership_inventory.size()}')
+            # update the graph
+            self.queue_stats[inventory_size - 1] += 1
 
-            # Car drives off the lot
+            # Signal the factory that a car has been sold
             self.empty.release()
 
             # Sleep a little after selling a car
             time.sleep(random.random() / SLEEP_REDUCE_FACTOR)
 
-        # self.log.write('DEALERSHIP:     SHIPMENTS CEASED')
-
 
 def main():
     log = Log(show_terminal=True)
 
+    # Semaphores to track cars in inventory
+    # and signal for queue access
     full = threading.Semaphore(0)
     empty = threading.Semaphore(10)
 
+    # The inventory queue
     cars_produced = Queue251()
 
     # This tracks the length of the car queue during receiving cars by the dealership
     # i.e., update this list each time the dealer receives a car
     queue_stats = [0] * MAX_QUEUE_SIZE
 
+    # Create the threaded classes
     factory = Factory(cars_produced, full, empty, queue_stats, log)
-
     dealership = Dealer(cars_produced, full, empty, queue_stats, log)
 
     log.start_timer()
 
+    # Start the threads
     factory.start()
     dealership.start()
 
+    # Finish the threads
     factory.join()
     dealership.join()
 
