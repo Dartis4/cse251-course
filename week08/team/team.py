@@ -1,7 +1,7 @@
 """
 Course: CSE 251
 Lesson Week: 08
-File: team.py
+File: team-bad.py
 Instructions:
 - Look for TODO comments
 """

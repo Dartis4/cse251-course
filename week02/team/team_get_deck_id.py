@@ -8,7 +8,7 @@ Purpose: Playing Card deck ID
 
 Instructions:
 
-- Run this once to get a ID to be used in the team.py program.
+- Run this once to get a ID to be used in the team-bad.py program.
 
 """
 

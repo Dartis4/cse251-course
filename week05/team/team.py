@@ -1,7 +1,7 @@
 """
 Course: CSE 251
 Lesson Week: 05
-File: team.py
+File: team-bad.py
 Author: Brother Comeau
 
 Purpose: Check for prime values

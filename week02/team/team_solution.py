@@ -1,7 +1,7 @@
 """
 Course: CSE 251
 Lesson Week: 02 - Team Activity
-File: team.py
+File: team-bad.py
 Author: Brother Comeau
 
 Purpose: Playing Card API calls
