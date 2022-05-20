@@ -77,13 +77,12 @@ class Queue251:
 class Factory(threading.Thread):
     """ This is a factory.  It will create cars and place them on the car queue """
 
-    def __init__(self, cars_produced, full, empty, queue_stats, log):
+    def __init__(self, cars_produced, full, empty, log):
         super().__init__()
 
         self.dealership_inventory = cars_produced
         self.full = full
         self.empty = empty
-        self.queue_stats = queue_stats
         self.log = log
 
     def run(self):
