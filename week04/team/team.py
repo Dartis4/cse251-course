@@ -94,7 +94,7 @@ def main():
     reader = threading.Thread(target=file_reader, args=[log, url_q, number_of_urls_in_queue])
 
     processes = []
-    [processes.append(threading.Thread(target=retrieve_thread, args=[log, url_q, number_of_urls_in_queue])) for i in range(RETRIEVE_THREADS)]
+    [processes.append(threading.Thread(target=retrieve_thread, args=[log, url_q, number_of_urls_in_queue])) for _ in range(RETRIEVE_THREADS)]
 
     log.start_timer()
 
