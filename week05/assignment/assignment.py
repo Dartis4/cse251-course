@@ -2,14 +2,14 @@
 Course: CSE 251
 Lesson Week: 05
 File: assignment.py
-Author: <Your name>
+Author: Dane Artis
 
 Purpose: Assignment 05 - Factories and Dealers
 
 Instructions:
 
 - Read the comments in the following code.  
-- Implement your code where the TODO comments are found.
+- Implement your code where the do comments are found.
 - No global variables, all data must be passed to the objects.
 - Only the included/imported packages are allowed.  
 - Thread/process pools are not allowed
@@ -61,7 +61,8 @@ class Car:
         self.display()
 
     def display(self):
-        print(f'{self.make} {self.model}, {self.year}', flush=True)
+        # print(f'{self.make} {self.model}, {self.year}', flush=True)
+        pass
 
 
 class Queue251:
@@ -88,7 +89,7 @@ class Factory(threading.Thread):
 
     def __init__(self, index, car_queue, full, empty, factory_stats, factory_barrier):
         super().__init__()
-        print("New Factory", flush=True)
+        # print("New Factory", flush=True)
 
         self.index = index
         self.cars_to_produce = random.randint(200, 300)  # Don't change
@@ -101,8 +102,8 @@ class Factory(threading.Thread):
 
     def run(self):
         for i in range(self.cars_to_produce):
-            print("Factory: produce car", flush=True)
-            # TODO produce the cars, then send them to the dealerships
+            # print(f"Factory {self.index}: produce car", flush=True)
+            # produce the cars, then send them to the dealerships
             # Does the dealer have space?
             self.empty.acquire()
 
@@ -117,21 +118,19 @@ class Factory(threading.Thread):
             # Signal the dealer about cars in inventory
             self.full.release()
 
-        print("Factory: Done.", flush=True)
-        # TODO wait until all of the factories are finished producing cars
+        # print(f"Factory {self.index}: Done.", flush=True)
+        # wait until all the factories are finished producing cars
         self.barrier.wait()
 
-        # TODO "Wake up/signal" the dealerships one more time.  Select one factory to do this
+        # "Wake up/signal" the dealerships one more time.  Select one factory to do this
         if self.index == 0:
-            print("Factory: ALL DONE", flush=True)
-            self.dealership_inventory.put('all done')
+            # print(f"Factory: ALL DONE", flush=True)
+            self.dealership_inventory.put('done')
             self.full.release()
 
 
 class Dealer(threading.Thread):
     """ This is a dealer that receives cars """
-    print("New Dealership", flush=True)
-
     def __init__(self, index, car_queue, full, empty, dealer_stats, dealership_barrier):
         super().__init__()
 
@@ -141,31 +140,39 @@ class Dealer(threading.Thread):
         self.empty = empty
         self.barrier = dealership_barrier
         self.stats = dealer_stats
+        self.flag = [0]
 
     def run(self):
         while True:
-            print("Dealer: sell car", flush=True)
-            # TODO handle a car
+            # print(f"Dealer {self.index}: sell car", flush=True)
             # Are there cars available in inventory?
-            self.full.acquire()
-            print("Dealer: acquire", flush=True)
+            if self.flag[0] == 1:
+                self.full.acquire()
+                break
+            else:
+                self.full.acquire()
+            # print(f"Dealer {self.index}: acquire", flush=True)
 
             # Sell the car
             car = self.dealership_inventory.get()  # CRITICAL SECTION
-            if car == 'all done':
+            if car == 'done':
                 # Stop if factory is done
-                self.dealership_inventory.put('all done')
+                # print(f'Dealer {self.index}: done.', flush=True)
+                self.dealership_inventory.put('done')
+                self.flag[0] = 1
+                self.full.release()
                 break
             self.stats[self.index] += 1
 
             # Signal the factory that a car has been sold
             self.empty.release()
 
-            print("Dealer: sold", flush=True)
+            # print(f"Dealer {self.index}: sold", flush=True)
 
             # Sleep a little - don't change.  This is the last line of the loop
             time.sleep(random.random() / (SLEEP_REDUCE_FACTOR + 0))
-        print("Dealer: done.", flush=True)
+        # if self.index == 0:
+        #     print('Dealer: ALL DONE', flush=True)
 
 
 def run_production(factory_count, dealer_count):
@@ -173,38 +180,38 @@ def run_production(factory_count, dealer_count):
         factories and dealerships passed in as arguments.
     """
 
-    # TODO Create semaphore(s)
+    # Create semaphore(s)
     full = threading.Semaphore(0)
     empty = threading.Semaphore(MAX_QUEUE_SIZE)
-    # TODO Create queue
+    # Create queue
     car_queue = Queue251()
-    # TODO Create lock(s)
+    # Create lock(s)
     lock = threading.Lock()
-    # TODO Create barrier(s)
+    # Create barrier(s)
     factory_barrier = threading.Barrier(factory_count)
-    dealership_barrier = threading.Barrier(factory_count)
+    dealership_barrier = threading.Barrier(dealer_count)
 
     # This is used to track the number of cars receives by each dealer
     dealer_stats = list([0] * dealer_count)
     factory_stats = list([0] * factory_count)
 
-    # TODO create your factories
+    # create your factories
     factories = [Factory(i, car_queue, full, empty, factory_stats, factory_barrier) for i in range(factory_count)]
 
-    # TODO create your dealerships
+    # create your dealerships
     dealerships = [Dealer(i, car_queue, full, empty, dealer_stats, dealership_barrier) for i in range(dealer_count)]
 
     log.start_timer()
 
-    # TODO Start all dealerships
+    # Start all dealerships
     [dealership.start() for dealership in dealerships]
 
     time.sleep(1)  # make sure all dealers have time to start
 
-    # TODO Start all factories
+    # Start all factories
     [factory.start() for factory in factories]
 
-    # TODO Wait for factories and dealerships to complete
+    # Wait for factories and dealerships to complete
     [dealership.join() for dealership in dealerships]
     [factory.join() for factory in factories]
 
