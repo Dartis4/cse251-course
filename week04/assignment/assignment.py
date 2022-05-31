@@ -166,7 +166,7 @@ def main():
     queue_stats = [0] * MAX_QUEUE_SIZE
 
     # Create the threaded classes
-    factory = Factory(cars_produced, full, empty, queue_stats, log)
+    factory = Factory(cars_produced, full, empty, log)
     dealership = Dealer(cars_produced, full, empty, queue_stats, log)
 
     log.start_timer()
