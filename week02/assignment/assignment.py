@@ -1,7 +1,7 @@
 """
 Course: CSE 251
 Lesson Week: 02
-File: assignment.py
+File: team.py
 Author: Brother Comeau
 
 Purpose: Retrieve Star Wars details from a server

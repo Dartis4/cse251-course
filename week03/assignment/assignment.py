@@ -2,7 +2,7 @@
 ------------------------------------------------------------------------------
 Course: CSE 251
 Lesson Week: 03
-File: assignment.py
+File: team.py
 Author: Dane Artis
 
 Purpose: Video Frame Processing

@@ -21,16 +21,16 @@ import multiprocessing as mp
 from matplotlib.pylab import plt
 import numpy as np
 import glob
-import math 
+import math
 
 # Include cse 251 common Python files - Dont change
 from cse251 import *
 
-TYPE_PRIME  = 'prime'
-TYPE_WORD   = 'word'
-TYPE_UPPER  = 'upper'
-TYPE_SUM    = 'sum'
-TYPE_NAME   = 'name'
+TYPE_PRIME = 'prime'
+TYPE_WORD = 'word'
+TYPE_UPPER = 'upper'
+TYPE_SUM = 'sum'
+TYPE_NAME = 'name'
 
 # Global lists to collect the task results
 result_primes = []
@@ -38,6 +38,7 @@ result_words = []
 result_upper = []
 result_sums = []
 result_names = []
+
 
 def is_prime(n: int):
     """Primality test using 6k+-1 optimization.
@@ -53,7 +54,8 @@ def is_prime(n: int):
             return False
         i += 6
     return True
- 
+
+
 def task_prime(value):
     """
     Use the is_prime() above
@@ -63,6 +65,7 @@ def task_prime(value):
         {value} is not prime
     """
     pass
+
 
 def task_word(word):
     """
@@ -74,6 +77,7 @@ def task_word(word):
     """
     pass
 
+
 def task_upper(text):
     """
     Add the following to the global list:
@@ -81,12 +85,14 @@ def task_upper(text):
     """
     pass
 
+
 def task_sum(start_value, end_value):
     """
     Add the following to the global list:
         sum of {start_value:,} to {end_value:,} = {total:,}
     """
     pass
+
 
 def task_name(url):
     """
@@ -129,13 +135,12 @@ def main():
 
     # TODO start and wait pools
 
-
     # Do not change the following code (to the end of the main function)
     def log_list(lst, log):
         for item in lst:
             log.write(item)
         log.write(' ')
-    
+
     log.write('-' * 80)
     log.write(f'Primes: {len(result_primes)}')
     log_list(result_primes, log)
@@ -162,6 +167,7 @@ def main():
     log.write(f'Number of Sums tasks: {len(result_sums)}')
     log.write(f'Number of Names tasks: {len(result_names)}')
     log.stop_timer(f'Finished processes {count} tasks')
+
 
 if __name__ == '__main__':
     main()

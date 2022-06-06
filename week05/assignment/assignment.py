@@ -1,7 +1,7 @@
 """
 Course: CSE 251
 Lesson Week: 05
-File: assignment.py
+File: team.py
 Author: Dane Artis
 
 Purpose: Assignment 05 - Factories and Dealers

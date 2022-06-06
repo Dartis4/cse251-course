@@ -1,7 +1,7 @@
 """
 Course: CSE 251
 Lesson Week: 10
-File: assignment.py
+File: team.py
 Author: <your name>
 
 Purpose: assignment for week 10 - reader writer problem
