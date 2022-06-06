@@ -1,7 +1,7 @@
 """
 Course: CSE 251
 Lesson Week: 14
-File: assignment.py
+File: team.py
 Author: <your name>
 Purpose: Assignment 14 - Family Search
 """

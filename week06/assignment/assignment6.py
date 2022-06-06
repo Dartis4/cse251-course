@@ -1,7 +1,7 @@
 """
 Course: CSE 251
 Lesson Week: 06
-File: assignment.py
+File: team.py
 Author: Dane Artis
 Purpose: Processing Plant
 Instructions:
