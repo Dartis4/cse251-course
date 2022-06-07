@@ -1,8 +1,8 @@
 """
 Course: CSE 251
 Lesson Week: 07
-File: assingnment.py
-Author: <Your name here>
+File: assignment.py
+Author: Dane Artis
 Purpose: Process Task Files
 
 Instructions:  See I-Learn
@@ -14,7 +14,7 @@ why they were the best choices.
 
 
 """
-
+import threading
 from datetime import datetime, timedelta
 import requests
 import multiprocessing as mp
@@ -38,6 +38,24 @@ result_words = []
 result_upper = []
 result_sums = []
 result_names = []
+
+
+class RequestThread(threading.Thread):
+    def __init__(self, url):
+        super().__init__()
+
+        self.url = url
+        self.response = {}
+
+    def run(self):
+        self.response = requests.get(self.url)
+
+
+def request_info(url):
+    thread = RequestThread(url)
+    thread.start()
+    thread.join()
+    return thread.response
 
 
 def is_prime(n: int):
@@ -64,7 +82,10 @@ def task_prime(value):
             - or -
         {value} is not prime
     """
-    pass
+    if is_prime(value):
+        return f'{value:,} is prime'
+    else:
+        return f'{value:,} is not prime'
 
 
 def task_word(word):
@@ -75,7 +96,11 @@ def task_word(word):
             - or -
         {word} not found *****
     """
-    pass
+    with open('words.txt', 'r') as f:
+        for w in f.readlines():
+            if w.strip() == word:
+                return f'{word} found'
+    return f'{word} not found'
 
 
 def task_upper(text):
@@ -83,7 +108,7 @@ def task_upper(text):
     Add the following to the global list:
         {text} ==>  uppercase version of {text}
     """
-    pass
+    return f'{text} ==> {text.upper()}'
 
 
 def task_sum(start_value, end_value):
@@ -91,7 +116,7 @@ def task_sum(start_value, end_value):
     Add the following to the global list:
         sum of {start_value:,} to {end_value:,} = {total:,}
     """
-    pass
+    return f'sum of {start_value:,} to {end_value:,} = {sum(range(start_value, end_value)):,}'
 
 
 def task_name(url):
@@ -102,7 +127,32 @@ def task_name(url):
             - or -
         {url} had an error receiving the information
     """
-    pass
+    response = request_info(url)
+    if response.status_code == 200:
+        res = response.json()
+        return f'{url} has name {res["name"]}'
+    else:
+        return f'{url} had an error receiving the information'
+
+
+def log_prime(value):
+    result_primes.append(value)
+
+
+def log_word(value):
+    result_words.append(value)
+
+
+def log_upper(value):
+    result_upper.append(value)
+
+
+def log_sum(value):
+    result_sums.append(value)
+
+
+def log_name(value):
+    result_names.append(value)
 
 
 def main():
@@ -110,6 +160,18 @@ def main():
     log.start_timer()
 
     # TODO Create process pools
+    prime_pool = mp.Pool(2)
+    word_pool = mp.Pool(2)
+    upper_pool = mp.Pool(2)
+    sum_pool = mp.Pool(2)
+    name_pool = mp.Pool(2)
+    pools = [
+        prime_pool,
+        word_pool,
+        upper_pool,
+        sum_pool,
+        name_pool
+    ]
 
     count = 0
     task_files = glob.glob("*.task")
@@ -121,19 +183,21 @@ def main():
         count += 1
         task_type = task['task']
         if task_type == TYPE_PRIME:
-            task_prime(task['value'])
+            prime_pool.apply_async(task_prime, args=(task['value'],), callback=log_prime)
         elif task_type == TYPE_WORD:
-            task_word(task['word'])
+            word_pool.apply_async(task_word, args=(task['word'],), callback=log_word)
         elif task_type == TYPE_UPPER:
-            task_upper(task['text'])
+            upper_pool.apply_async(task_upper, args=(task['text'],), callback=log_upper)
         elif task_type == TYPE_SUM:
-            task_sum(task['start'], task['end'])
+            sum_pool.apply_async(task_sum, args=(task['start'], task['end']), callback=log_sum)
         elif task_type == TYPE_NAME:
-            task_name(task['url'])
+            name_pool.apply_async(task_name, args=(task['url'],), callback=log_name)
         else:
             log.write(f'Error: unknown task type {task_type}')
 
     # TODO start and wait pools
+    [pool.close() for pool in pools]
+    [pool.join() for pool in pools]
 
     # Do not change the following code (to the end of the main function)
     def log_list(lst, log):
