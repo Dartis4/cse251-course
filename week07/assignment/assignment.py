@@ -7,11 +7,18 @@ Purpose: Process Task Files
 
 Instructions:  See I-Learn
 
-TODO
-
-Add you comments here on the pool sizes that you used for your assignment and
+Add your comments here on the pool sizes that you used for your assignment and
 why they were the best choices.
 
+The pool sizes I chose to use I calculated by giving each pool only 1 process
+and then test to see how much adding 1 process to each pool would improve the
+performance. The word pool improved the most from having an extra process,
+about 40% improvement. The other pools had minimal improvement. I found that
+distributing the same number of processes as cores on the cpu achieved the
+best result for performance improvement. In this case, it had the most
+improvement with 1 more process than cores on my cpu. On my other computer,
+it improved the most with the same number of processes as cores in the
+computer.
 
 """
 import threading
@@ -159,12 +166,12 @@ def main():
     log = Log(show_terminal=True)
     log.start_timer()
 
-    # TODO Create process pools
-    prime_pool = mp.Pool(2)
-    word_pool = mp.Pool(2)
-    upper_pool = mp.Pool(2)
-    sum_pool = mp.Pool(2)
-    name_pool = mp.Pool(2)
+    # Create process pools
+    prime_pool = mp.Pool(3)  # 3
+    word_pool = mp.Pool(5)  # 5
+    upper_pool = mp.Pool(3)  # 3
+    sum_pool = mp.Pool(2)  # 2
+    name_pool = mp.Pool(4)  # 4
     pools = [
         prime_pool,
         word_pool,
@@ -195,7 +202,7 @@ def main():
         else:
             log.write(f'Error: unknown task type {task_type}')
 
-    # TODO start and wait pools
+    # start and wait pools
     [pool.close() for pool in pools]
     [pool.join() for pool in pools]
 
