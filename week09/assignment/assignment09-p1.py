@@ -2,7 +2,7 @@
 Course: CSE 251 
 Lesson Week: 09
 File: assignment09-p1.py 
-Author: <Add name here>
+Author: Dane Artis
 
 Purpose: Part 1 of assignment 09, finding a path to the end position in a maze
 
@@ -32,13 +32,30 @@ def solve_path(maze):
         
     # TODO start add code here
     path = []
+
+    start = maze.get_start_pos()
+
+    def find_move(current_pos):
+        possible_moves = maze.get_possible_moves(*current_pos)
+
+        for space in possible_moves:
+            if maze.can_move_here(*space):
+                maze.move(*space, COLOR)
+                path.append(space)
+                find_move(space)
+            else:
+                maze.restore(*space)
+                return
+            if maze.at_end(*space):
+                break
+    find_move(start)
     return path
 
 
 def get_path(log, filename):
     """ Do not change this function """
 
-    # create a Screen Object that will contain all of the drawing commands
+    # create a Screen Object that will contain all the drawing commands
     screen = Screen(SCREEN_SIZE, SCREEN_SIZE)
     screen.background((255, 255, 0))
 
