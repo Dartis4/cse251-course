@@ -16,8 +16,8 @@ import time
 import cv2
 import numpy as np
 
-class Screen:
 
+class Screen:
     # Consts values
     COMMAND_MOVE = 1
     COMMAND_COLOR = 2
@@ -60,7 +60,7 @@ class Screen:
         self.commands.append((self.COMMAND_LINE, int(x1), int(y1), int(x2), int(y2), color))
 
     def update(self):
-        self.commands.append((self.COMMAND_UPDATE, ))
+        self.commands.append((self.COMMAND_UPDATE,))
 
     def block(self, x, y, width, height, color='black'):
         self.commands.append((self.COMMAND_BLOCK, int(x), int(y), int(width), int(height), color))
@@ -79,11 +79,11 @@ class Screen:
         for action in self.commands:
             # print(action)
             code = action[0]
-            if   code == self.COMMAND_MOVE:
+            if code == self.COMMAND_MOVE:
                 pos_x = action[1]
                 pos_y = action[2]
 
-            elif code == self.COMMAND_COLOR:            
+            elif code == self.COMMAND_COLOR:
                 color = action[1]
 
             elif code == self.COMMAND_UPDATE:
@@ -104,7 +104,8 @@ class Screen:
                 cv2.line(self.board, (action[1], action[2]), (action[3], action[4]), action[5], 1)
 
             elif code == self.COMMAND_BLOCK:
-                cv2.rectangle(self.board, (action[1], action[2]), (action[1] + action[3], action[2] + action[4]), action[5], -1)
+                cv2.rectangle(self.board, (action[1], action[2]), (action[1] + action[3], action[2] + action[4]),
+                              action[5], -1)
 
             else:
                 print(f'Invalid action found: {action}')
