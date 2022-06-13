@@ -11,7 +11,7 @@ Purpose: Maze class for assignment 08 and 09
 
 Instructions:
 
-- You can only call the method that don't begin wih a '_' character
+- You can only call the methods that don't begin wih a '_' character
 
 """
 

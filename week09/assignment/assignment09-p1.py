@@ -23,32 +23,47 @@ from cse251 import *
 SCREEN_SIZE = 800
 COLOR = (0, 0, 255)
 
+depth = 0
 
-# TODO add any functions
+
+# add any functions
 
 def solve_path(maze):
     """ Solve the maze and return the path found between the start and end positions.  
         The path is a list of positions, (x, y) """
-        
-    # TODO start add code here
     path = []
-
     start = maze.get_start_pos()
 
-    def find_move(current_pos):
-        possible_moves = maze.get_possible_moves(*current_pos)
+    maze.move(*start, COLOR)
+    if maze.at_end(*start):
+        path.append(start)
+        return path
 
-        for space in possible_moves:
-            if maze.can_move_here(*space):
-                maze.move(*space, COLOR)
-                path.append(space)
-                find_move(space)
-            else:
-                maze.restore(*space)
-                return
-            if maze.at_end(*space):
+    def find_path(current_pos):
+        global depth
+        depth += 1
+        temp = 'not found'
+        if maze.can_move_here(*current_pos):
+            maze.move(*current_pos, COLOR)
+        if maze.at_end(*current_pos):
+            path.append(current_pos)
+            depth -= 1
+            return 'found'
+        pos = maze.get_possible_moves(*current_pos)
+        if not pos:
+            depth -= 1
+            return 'dead_end'
+        for p in pos:
+            temp = find_path(p)
+            if temp == 'found':
+                path.append(p)
                 break
-    find_move(start)
+            if temp == 'dead_end':
+                maze.restore(*p)
+        depth -= 1
+        return temp
+
+    find_path(start)
     return path
 
 
