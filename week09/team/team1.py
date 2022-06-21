@@ -16,7 +16,7 @@ held by only one philosopher and so a philosopher can use the fork only if it
 is not being used by another philosopher. After an individual philosopher
 finishes eating, they need to put down both forks so that the forks become
 available to others. A philosopher can only take the fork on their right or
-the one on their left as they become available and they cannot start eating
+the one on their left as they become available, and they cannot start eating
 before getting both forks.  When a philosopher is finished eating, they think 
 for a little while.
 
@@ -36,14 +36,14 @@ Instructions:
 
 - You have Locks and Semaphores that you can use.
 - Remember that lock.acquire() has an argument called timeout.
-- philosophers need to eat for 1 to 3 seconds when they get both forks.  
-  When the number of philosophers has eaten MAX_MEALS times, stop the philosophers
+- philosophers need to eat for 1 to 3 seconds when they get both forks.
+- When the number of philosophers has eaten MAX_MEALS times, stop the philosophers
   from trying to eat and any philosophers eating will put down their forks when finished.
-- philosophers need to think for 1 to 3 seconds when they are finished eating.  
+- philosophers need to think for 1 to 3 seconds when they are finished eating.
 - You want as many philosophers to eat and think concurrently.
 - Design your program to handle N philosophers and N forks after you get it working for 5.
-- Use threads for this problem.
-- When you get your program working, how to you prove that no philosopher will starve?
+- Use threads for this issue.
+- When you get your program working, how do you prove that no philosopher will starve?
   (Just looking at output from print() statements is not enough)
 - Are the philosophers each eating and thinking the same amount?
 - Using lists for philosophers and forks will help you in this program.
@@ -56,13 +56,35 @@ import threading
 PHILOSOPHERS = 5
 MAX_MEALS = PHILOSOPHERS * 5
 
-def main():
-    # TODO - create the forks
-    # TODO - create PHILOSOPHERS philosophers
-    # TODO - Start them eating and thinking
-    # TODO - Display how many times each philosopher ate
+tot_meals_eaten = 0
 
+# use lists for forks and philosophers and cyclical counters
+
+
+class Philosopher(threading.Thread):
+    def __init(self, forks_available):
+        super().__init__()
+        self.meals_eaten = 0
+        self.forks = forks_available
+
+    def run(self):
+        global tot_meals_eaten
+        while tot_meals_eaten < MAX_MEALS:
+            with self.forks:
+                pass
+
+
+def main():
+    # create the forks
+    forks = [threading.Lock(timeout=0.5) for _ in PHILOSOPHERS]
+    # create PHILOSOPHERS philosophers
+    philosopher_list = [Philosopher(forks) for _ in range(PHILOSOPHERS)]
+    # Start them eating and thinking
+    [p.start() for p in philosopher_list]
+    # Display how many times each philosopher ate
+    print(sum(map(lambda p: p.eaten, philosopher_list)))
     pass
+
 
 if __name__ == '__main__':
     main()

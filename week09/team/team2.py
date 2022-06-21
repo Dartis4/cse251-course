@@ -65,14 +65,49 @@ import threading
 PHILOSOPHERS = 5
 MAX_MEALS = PHILOSOPHERS * 5
 
-def main():
-    # TODO - create the waiter (A class would be best here)
-    # TODO - create the forks
-    # TODO - create PHILOSOPHERS philosophers
-    # TODO - Start them eating and thinking
-    # TODO - Display how many times each philosopher ate
 
-    pass
+class Philosopher(threading.Thread):
+    def __init(self, index, waiter):
+        super().__init__()
+        self.meals_eaten = 0
+        self.index = index
+        self.waiter = waiter
+
+    def run(self):
+        if self.waiter.serve_fork(self.index, self.eaten):
+            # eat
+            # release fork
+            pass
+
+
+
+class Waiter:
+    def __init__(self):
+        self.forks = [threading.Lock() for _ in range(PHILOSOPHERS)]
+        self.meals_served = 0
+    def serve_fork(self, index):
+        if self.meals_served < MAX_MEALS / PHILOSOPHERS:
+            left_fork = self.forks[index]
+            right_fork = self.forks[(index + 1) % len(self.forks)]
+            if left_fork.acquire(timeout=0.5):
+                return right_fork.acquire(timeout=0.5)
+            elif right_fork.acquire(timeout=0.5):
+                return left_fork.acquire(timeout=0.5)
+            return False
+
+
+def main():
+    # create the waiter (A class would be best here)
+    waiter = Waiter
+    # create the forks
+    # Created in waiter
+    # create PHILOSOPHERS philosophers
+    philosopher_list = [Philosopher(i, waiter) for i in range(PHILOSOPHERS)]
+    # Start them eating and thinking
+    map(lambda x: x.start(), philosopher_list)
+    # Display how many times each philosopher ate
+    map(lambda x: print(x.index, x.meals_eaten), philosopher_list)
+
 
 if __name__ == '__main__':
     main()
