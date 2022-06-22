@@ -2,7 +2,7 @@
 Course: CSE 251 
 Lesson Week: 09
 File: assignment09-p2.py 
-Author: <Add name here>
+Author: Dane Artis
 
 Purpose: Part 2 of assignment 09, finding the end position in the maze
 
@@ -18,16 +18,21 @@ change the program to display the found path to the exit position.
 
 What would be your strategy?  
 
-<Answer here>
+If we have a global path variable that we can append the correct path to,
+then we could keep track of the paths and once the end is found, we
+append the found path to that variable as we return out of the recursion.
 
 
 Why would it work?
 
-<Answer here>
+Since we have many different paths that are using threads, we can keep
+track up to each fork in the maze. As we return out, this method of saving
+the path allows us to record the correct fork path and use the global path
+as the final path.
 
 """
 import math
-import threading 
+import threading
 from screen import Screen
 from maze import Maze
 import sys
@@ -39,28 +44,29 @@ from cse251 import *
 SCREEN_SIZE = 800
 COLOR = (0, 0, 255)
 COLORS = (
-    (0,0,255),
-    (0,255,0),
-    (255,0,0),
-    (255,255,0),
-    (0,255,255),
-    (255,0,255),
-    (128,0,0),
-    (128,128,0),
-    (0,128,0),
-    (128,0,128),
-    (0,128,128),
-    (0,0,128),
-    (72,61,139),
-    (143,143,188),
-    (226,138,43),
-    (128,114,250)
+    (0, 0, 255),
+    (0, 255, 0),
+    (255, 0, 0),
+    (255, 255, 0),
+    (0, 255, 255),
+    (255, 0, 255),
+    (128, 0, 0),
+    (128, 128, 0),
+    (0, 128, 0),
+    (128, 0, 128),
+    (0, 128, 128),
+    (0, 0, 128),
+    (72, 61, 139),
+    (143, 143, 188),
+    (226, 138, 43),
+    (128, 114, 250)
 )
 
 # Globals
 current_color_index = 0
 thread_count = 0
 stop = False
+
 
 def get_color():
     """ Returns a different color when called """
@@ -75,8 +81,45 @@ def get_color():
 def solve_find_end(maze):
     """ finds the end position using threads.  Nothing is returned """
     # When one of the threads finds the end position, stop all of them
+    global stop, thread_count
+    thread_count = 0
+    start = maze.get_start_pos()
+    start_color = get_color()
 
-    pass
+    def pathfinder(position, color):
+        global stop, thread_count
+        if not stop:
+            path = threading.Thread(target=find_path, args=(position, color))
+            thread_count += 1
+            path.start()
+
+    def find_path(current_pos, color):
+        global stop
+
+        # Move to the location if possible
+        if maze.can_move_here(*current_pos):
+            maze.move(*current_pos, color)
+
+        # If the current position is the end, stop and return
+        if maze.at_end(*current_pos):
+            stop = True
+            return
+
+        if not stop:
+            # Find routes
+            possible = maze.get_possible_moves(*current_pos)
+            # If no paths, return
+            if not possible:
+                return
+            elif len(possible) == 1:
+                pathfinder(possible[0], color)
+            else:
+                # Iterate available routes
+                pathfinder(possible[0], color)
+                for p in possible[1:]:
+                    pathfinder(p, get_color())
+    find_path(start, start_color)
+    stop = False
 
 
 def find_end(log, filename, delay):
@@ -84,7 +127,7 @@ def find_end(log, filename, delay):
 
     global thread_count
 
-    # create a Screen Object that will contain all of the drawing commands
+    # create a Screen Object that will contain all the drawing commands
     screen = Screen(SCREEN_SIZE, SCREEN_SIZE)
     screen.background((255, 255, 0))
 
@@ -98,7 +141,7 @@ def find_end(log, filename, delay):
     done = False
     speed = 1
     while not done:
-        if screen.play_commands(speed): 
+        if screen.play_commands(speed):
             key = cv2.waitKey(0)
             if key == ord('+'):
                 speed = max(0, speed - 1)
@@ -108,7 +151,6 @@ def find_end(log, filename, delay):
                 done = True
         else:
             done = True
-
 
 
 def find_ends(log):
@@ -139,7 +181,6 @@ def main():
     sys.setrecursionlimit(5000)
     log = Log(show_terminal=True)
     find_ends(log)
-
 
 
 if __name__ == "__main__":
