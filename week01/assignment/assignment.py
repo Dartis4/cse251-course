@@ -195,7 +195,7 @@ def run_with_threads(tur, log, main_turtle):
 
     tur.move(0, 0)
 
-    # TODO - Start add your code here.
+    # Start add your code here.
     # You need to use 4 threads where each thread concurrently drawing one type of shape.
     # You are free to change any functions in this code except main()
 
