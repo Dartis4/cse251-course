@@ -95,8 +95,8 @@ def main():
     remove = mp.Lock()
 
     # TODO - create reader and writer processes
-    readers = [mp.Process(target=receive, args=(shared_list,)) for _ in READERS]
-    writers = [mp.Process(target=send, args=(shared_list,)) for _ in WRITERS]
+    readers = [mp.Process(target=receive, args=(shared_list,)) for _ in range(READERS)]
+    writers = [mp.Process(target=send, args=(shared_list,)) for _ in range(WRITERS)]
 
     # TODO - Start the processes and wait for them to finish
     map(lambda p: p.start(), readers)
