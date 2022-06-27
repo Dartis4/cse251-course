@@ -27,16 +27,17 @@ import os
 
 TOP_API_URL = 'http://127.0.0.1:8790'
 
-URL_PEOPLE    = "people"
-URL_PLANETS   = "planets"
-URL_FILMS     = "films"
-URL_SPECIES   = "species"
-URL_VEHICLES  = "vehicles"
+URL_PEOPLE = "people"
+URL_PLANETS = "planets"
+URL_FILMS = "films"
+URL_SPECIES = "species"
+URL_VEHICLES = "vehicles"
 URL_STARSHIPS = "starships"
 
-DELAY = 1.0         # one second
+DELAY = 1.0  # one second
 
 master_dict = {}
+
 
 class Handler(BaseHTTPRequestHandler):
 
@@ -52,10 +53,10 @@ class Handler(BaseHTTPRequestHandler):
         # check to top level URL
         if self.path == '/':
             reply = '{"people": "http://127.0.0.1:8790/people/", ' + \
-                    '"planets": "http://127.0.0.1:8790/planets/", '  + \
+                    '"planets": "http://127.0.0.1:8790/planets/", ' + \
                     '"films": "http://127.0.0.1:8790/films/", ' + \
                     '"species": "http://127.0.0.1:8790/species/", ' + \
-                    '"vehicles": "http://127.0.0.1:8790/vehicles/", '  + \
+                    '"vehicles": "http://127.0.0.1:8790/vehicles/", ' + \
                     '"starships": "http://127.0.0.1:8790/starships/"}'
             self.send_response(200)
             self.end_headers()
@@ -65,7 +66,7 @@ class Handler(BaseHTTPRequestHandler):
             if self.path[-1] == '/':
                 self.path = self.path[:-1]
 
-            request = self.path[1:]   # "people/1"
+            request = self.path[1:]  # "people/1"
             parts = request.split('/')
             # print(parts)
             if len(parts) != 2:
@@ -113,7 +114,7 @@ def run():
     # load dict
     with open('data.txt') as f:
         data = f.read()
-      
+
     # reconstructing the data as a dictionary
     master_dict = json.loads(data)
 
