@@ -6,15 +6,18 @@ Author: Brother Comeau
 Instructions:
 - Look for the TODO comments
 """
-
+import mmap
 import time
 import threading
+
 
 # -----------------------------------------------------------------------------
 def reverse_file(filename):
     """ Display a file in reverse order using a mmap file. """
-    # TODO add code here
-    pass
+    with open(filename, mode='r', encoding='utf8') as file_obj:
+        with mmap.mmap(file_obj.fileno(), length=0, access=mmap.ACCESS_READ) as map_file:
+            for i in range(map_file.size() - 1, -1, -1):
+                print(chr(map_file[i]), end='')
 
 
 # -----------------------------------------------------------------------------
@@ -49,13 +52,14 @@ def promote_letter_a_threads(filename):
 def main():
     reverse_file('data.txt')
     promote_letter_a('letter_a.txt')
-    
+
     # TODO
     # When you get the function promote_letter_a() working
     #  1) Comment out the promote_letter_a() call
     #  2) run create_Data_file.py again to re-create the "letter_a.txt" file
     #  3) Uncomment the function below
     # promote_letter_a_threads('letter_a.txt')
+
 
 if __name__ == '__main__':
     main()

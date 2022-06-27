@@ -2,7 +2,7 @@
 Course: CSE 251
 Lesson Week: 10
 File: team.py
-Author: <your name>
+Author: Dane Artis
 
 Purpose: assignment for week 10 - reader writer problem
 
@@ -41,6 +41,17 @@ Instructions:
   3) Any indexes that the processes need to keep track of the data queue
   4) Any other values you need for the assignment
 
+  CRITICAL SECTIONS:
+  - Insert index
+  - Remove index
+  - Managed List
+
+  size of buffer = current_index - remove_index
+
+  current_index += 1
+
+  current_index % SIZE
+
 - Not allowed to use Queue(), Pipe(), List() or any other data structure.
 
 - Not allowed to use Value() or Array() or any other shared data type from 
@@ -52,6 +63,7 @@ Add any comments for me:
 
 """
 import random
+from multiprocessing import shared_memory
 from multiprocessing.managers import SharedMemoryManager
 import multiprocessing as mp
 
@@ -59,8 +71,15 @@ BUFFER_SIZE = 10
 READERS = 2
 WRITERS = 2
 
-def main():
 
+def send(s_list):
+    pass
+
+def receive(s_list):
+    pass
+
+
+def main():
     # This is the number of values that the writer will send to the reader
     items_to_send = random.randint(1000, 10000)
 
@@ -68,13 +87,20 @@ def main():
     smm.start()
 
     # TODO - Create a ShareableList to be used between the processes
+    shared_list = shared_memory.ShareableList([0]*BUFFER_SIZE)
 
     # TODO - Create any lock(s) or semaphore(s) that you feel you need
+    buffer = mp.Semaphore(0)
+    insert = mp.Lock()
+    remove = mp.Lock()
 
     # TODO - create reader and writer processes
+    readers = [mp.Process(target=receive, args=(shared_list,)) for _ in READERS]
+    writers = [mp.Process(target=send, args=(shared_list,)) for _ in WRITERS]
 
     # TODO - Start the processes and wait for them to finish
-
+    map(lambda p: p.start(), readers)
+    map(lambda p: p.start(), writers)
     print(f'{items_to_send} values sent')
 
     # TODO - Display the number of numbers/items received by the reader.
