@@ -59,24 +59,53 @@ Instructions:
 
 Add any comments for me:
 
-
-
 """
 import random
-from multiprocessing import shared_memory
+import time
 from multiprocessing.managers import SharedMemoryManager
+from multiprocessing import shared_memory
 import multiprocessing as mp
 
 BUFFER_SIZE = 10
-READERS = 2
-WRITERS = 2
+READERS = 1
+WRITERS = 1
+
+CURRENT = -4
+WRITE_I = -3
+READ_I = -2
+END = -1
 
 
-def send(s_list):
-    pass
+def send(s_list, access, buffer_spot_empty, buffer_spot_full):
+    print('send started')
+    while True:
+        with access:
+            if s_list[CURRENT] < s_list[END]:
+                buffer_spot_empty.acquire()
+                s_list[s_list[WRITE_I]] = s_list[CURRENT]
+                # print(f'SEND: {s_list[s_list[WRITE_I]]}', flush=True)
+                s_list[CURRENT] = s_list[CURRENT] + 1
+                s_list[WRITE_I] = (s_list[WRITE_I] + 1) % BUFFER_SIZE
+                buffer_spot_full.release()
+            else:
+                break
+        time.sleep(0.001)
 
-def receive(s_list):
-    pass
+
+def receive(s_list, access, buffer_spot_empty, buffer_spot_full):
+    print('receive started')
+    while True:
+        buffer_spot_full.acquire()
+        with access:
+            # print(s_list)
+            print(f'RECEIVED: {s_list[s_list[READ_I]]}', flush=True)
+            if s_list[CURRENT] == s_list[END]:
+                break
+            else:
+                # print('r ind:', (s_list[READ_I] + 1) % BUFFER_SIZE)
+                s_list[READ_I] = (s_list[READ_I] + 1) % BUFFER_SIZE
+            buffer_spot_empty.release()
+        time.sleep(0.001)
 
 
 def main():
@@ -86,28 +115,48 @@ def main():
     smm = SharedMemoryManager()
     smm.start()
 
-    # TODO - Create a ShareableList to be used between the processes
-    shared_list = shared_memory.ShareableList([0]*BUFFER_SIZE)
+    # Create a ShareableList to be used between the processes
+    start = 1
+    write_index = 0
+    read_index = 0
+    temp = [0] * BUFFER_SIZE
+    temp.append(start)
+    temp.append(write_index)
+    temp.append(read_index)
+    temp.append(items_to_send)
+    shared_list = smm.ShareableList(temp)
+    # print(shared_list)
+    # print(shared_list[CURRENT], shared_list[WRITE_I], shared_list[READ_I], shared_list[END])
 
-    # TODO - Create any lock(s) or semaphore(s) that you feel you need
-    buffer = mp.Semaphore(0)
-    insert = mp.Lock()
-    remove = mp.Lock()
+    # Create any lock(s) or semaphore(s) that you feel you need
+    buffer_spot_empty = mp.Semaphore(BUFFER_SIZE)
+    buffer_spot_full = mp.Semaphore(0)
+    access_w = mp.Lock()
+    access_r = mp.Lock()
 
-    # TODO - create reader and writer processes
-    readers = [mp.Process(target=receive, args=(shared_list,)) for _ in range(READERS)]
-    writers = [mp.Process(target=send, args=(shared_list,)) for _ in range(WRITERS)]
+    # create reader and writer processes
+    writers = [mp.Process(target=send, args=(shared_list, access_w, buffer_spot_empty, buffer_spot_full)) for _ in range(WRITERS)]
+    readers = [mp.Process(target=receive, args=(shared_list, access_r, buffer_spot_empty, buffer_spot_full)) for _ in range(READERS)]
 
-    # TODO - Start the processes and wait for them to finish
-    map(lambda p: p.start(), readers)
-    map(lambda p: p.start(), writers)
+    # Start the processes and wait for them to finish
+    [p.start() for p in writers]
+    [p.start() for p in readers]
+
+    [p.join() for p in writers]
+    [p.join() for p in readers]
+
     print(f'{items_to_send} values sent')
 
-    # TODO - Display the number of numbers/items received by the reader.
+    # Display the number of numbers/items received by the reader.
     #        Can not use "items_to_send", must be a value collected
     #        by the reader processes.
-    # print(f'{<your variable>} values received')
+    print(f'{shared_list[CURRENT]} values received')
 
+    # print('values received:')
+    # print(*written_values, sep=', ')
+
+    shared_list.shm.close()
+    shared_list.shm.unlink()
     smm.shutdown()
 
 
