@@ -139,11 +139,11 @@ def main():
     readers = [mp.Process(target=receive, args=(shared_list, access_r, buffer_spot_empty, buffer_spot_full)) for _ in range(READERS)]
 
     # Start the processes and wait for them to finish
-    [p.start() for p in writers]
-    [p.start() for p in readers]
+    list(map(lambda proc: proc.start(), writers))
+    list(map(lambda proc: proc.start(), readers))
 
-    [p.join() for p in writers]
-    [p.join() for p in readers]
+    list(map(lambda proc: proc.join(), writers))
+    list(map(lambda proc: proc.join(), readers))
 
     print(f'{items_to_send} values sent')
 
