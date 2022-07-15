@@ -8,11 +8,11 @@ import threading
 import json
 import requests
 
-
-# Include cse 251 common Python files - Dont change
+# Include cse 251 common Python files - Don't change
 from cse251 import *
 
 TOP_API_URL = 'http://127.0.0.1:8123'
+
 
 # ----------------------------------------------------------------------------
 class Person:
@@ -26,17 +26,18 @@ class Person:
         self.birth = data['birth']
 
     def __str__(self):
-        output  = f'id        : {self.id}\n'
+        output = f'id        : {self.id}\n'
         output += f'name      : {self.name}\n'
         output += f'birth     : {self.birth}\n'
         output += f'parent id : {self.parents}\n'
         output += f'family id : {self.family}\n'
         return output
 
+
 # ----------------------------------------------------------------------------
 class Family:
 
-    def __init__(self, id, data):
+    def __init__(self, ident, data):
         super().__init__()
         self.id = data['id']
         self.husband = data['husband_id']
@@ -47,12 +48,13 @@ class Family:
         return len(self.children)
 
     def __str__(self):
-        output  = f'id         : {self.id}\n'
+        output = f'id         : {self.id}\n'
         output += f'husband    : {self.husband}\n'
         output += f'wife       : {self.wife}\n'
-        for id in self.children:
-            output += f'  Child    : {id}\n'
+        for ident in self.children:
+            output += f'  Child    : {ident}\n'
         return output
+
 
 # -----------------------------------------------------------------------------
 class Tree:
@@ -75,15 +77,15 @@ class Tree:
         else:
             self.families[family.id] = family
 
-    def get_person(self, id):
-        if id in self.people:
-            return self.people[id]
+    def get_person(self, ident):
+        if ident in self.people:
+            return self.people[ident]
         else:
             return None
 
-    def get_family(self, id):
-        if id in self.families:
-            return self.families[id]
+    def get_family(self, ident):
+        if ident in self.families:
+            return self.families[ident]
         else:
             return None
 
@@ -93,11 +95,11 @@ class Tree:
     def get_family_count(self):
         return len(self.families)
 
-    def does_person_exist(self, id):
-        return id in self.people
+    def does_person_exist(self, ident):
+        return ident in self.people
 
-    def does_family_exist(self, id):
-        return id in self.families
+    def does_family_exist(self, ident):
+        return ident in self.families
 
     def display(self, log):
         log.write('\n\n')
@@ -109,20 +111,20 @@ class Tree:
 
             # Husband
             husband = self.get_person(fam.husband)
-            if husband == None:
+            if husband is None:
                 log.write(f'  Husband: None')
             else:
                 log.write(f'  Husband: {husband.name}, {husband.birth}')
 
             # wife
             wife = self.get_person(fam.wife)
-            if wife == None:
+            if wife is None:
                 log.write(f'  Wife: None')
             else:
                 log.write(f'  Wife: {wife.name}, {wife.birth}')
 
             # Parents of Husband
-            if husband == None:
+            if husband is None:
                 log.write(f'  Husband Parents: None')
             else:
                 parent_fam_id = husband.parents
@@ -135,7 +137,7 @@ class Tree:
                     log.write(f'  Husband Parents: None')
 
             # Parents of Wife
-            if wife == None:
+            if wife is None:
                 log.write(f'  Wife Parents: None')
             else:
                 parent_fam_id = wife.parents
@@ -161,42 +163,39 @@ class Tree:
         log.write(f'Max generations                     : {self._count_generations(self.start_family_id)}')
         log.write(f'People connected to starting family : {self._test_number_connected_to_start()}')
 
-
     def _test_number_connected_to_start(self):
         # start with first family, how many connected to that family
         inds_seen = set()
 
-        def _recurive(family_id):
+        def _recursive(family_id):
             nonlocal inds_seen
             if family_id in self.families:
                 # count people in this family
                 fam = self.families[family_id]
 
                 husband = self.get_person(fam.husband)
-                if husband != None:
+                if husband is not None:
                     if husband.id not in inds_seen:
                         inds_seen.add(husband.id)
-                    _recurive(husband.parents)
-                
+                    _recursive(husband.parents)
+
                 wife = self.get_person(fam.wife)
-                if wife != None:
+                if wife is not None:
                     if wife.id not in inds_seen:
                         inds_seen.add(wife.id)
-                    _recurive(wife.parents)
+                    _recursive(wife.parents)
 
                 for child_id in fam.children:
                     if child_id not in inds_seen:
                         inds_seen.add(child_id)
 
-
-        _recurive(self.start_family_id)
+        _recursive(self.start_family_id)
         return len(inds_seen)
-
 
     def _count_generations(self, family_id):
         max_gen = -1
 
-        def _recurive_gen(id, gen):
+        def _recursive_gen(id, gen):
             nonlocal max_gen
             if id in self.families:
                 if max_gen < gen:
@@ -205,19 +204,19 @@ class Tree:
                 fam = self.families[id]
 
                 husband = self.get_person(fam.husband)
-                if husband != None:
-                    _recurive_gen(husband.parents, gen + 1)
-                
-                wife = self.get_person(fam.wife)
-                if wife != None:
-                    _recurive_gen(wife.parents, gen + 1)
+                if husband is not None:
+                    _recursive_gen(husband.parents, gen + 1)
 
-        _recurive_gen(family_id, 0)
+                wife = self.get_person(fam.wife)
+                if wife is not None:
+                    _recursive_gen(wife.parents, gen + 1)
+
+        _recursive_gen(family_id, 0)
         return max_gen + 1
 
 
 # ----------------------------------------------------------------------------
-class Request_thread(threading.Thread):
+class RequestThread(threading.Thread):
 
     def __init__(self, url):
         # Call the Thread class's init function
@@ -232,4 +231,3 @@ class Request_thread(threading.Thread):
             self.response = response.json()
         else:
             print('RESPONSE = ', response.status_code)
-

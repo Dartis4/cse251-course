@@ -1,8 +1,8 @@
 """
 Course: CSE 251
 Lesson Week: 14
-File: team.py
-Author: <your name>
+File: assignment.py
+Author: Dane Artis
 Purpose: Assignment 14 - Family Search
 """
 import time
@@ -12,17 +12,18 @@ import requests
 from common import *
 from functions import depth_fs_pedigree, breadth_fs_pedigree, breadth_fs_pedigree_limit5
 
-# Include cse 251 common Python files - Dont change
+# Include cse 251 common Python files - Don't change
 from cse251 import *
 
 DFS = 'Depth First Search'
 BFS = 'Breadth First Search'
 BFS5 = 'Breadth First Search limit 5'
 
+
 def run_part(log, start_id, generations, title, func):
     tree = Tree(start_id)
 
-    req = Request_thread(f'{TOP_API_URL}/start/{generations}')
+    req = RequestThread(f'{TOP_API_URL}/start/{generations}')
     req.start()
     req.join()
 
@@ -33,7 +34,7 @@ def run_part(log, start_id, generations, title, func):
     func(start_id, tree)
     total_time = log.stop_timer()
 
-    req = Request_thread(f'{TOP_API_URL}/end')
+    req = RequestThread(f'{TOP_API_URL}/end')
     req.start()
     req.join()
 
@@ -41,7 +42,8 @@ def run_part(log, start_id, generations, title, func):
     log.write('')
     log.write(f'total_time                          : {total_time:.5f}')
     log.write(f'Generations                         : {generations}')
-    log.write(f'People % Families / second          : {(tree.get_person_count()  + tree.get_family_count()) / total_time:.5f}')
+    log.write(
+        f'People % Families / second          : {(tree.get_person_count() + tree.get_family_count()) / total_time:.5f}')
     log.write('')
 
 
@@ -49,7 +51,7 @@ def main():
     log = Log(show_terminal=True, filename_log='assignment.log')
 
     # starting family
-    req = Request_thread(TOP_API_URL)
+    req = RequestThread(TOP_API_URL)
     req.start()
     req.join()
 
@@ -75,4 +77,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
